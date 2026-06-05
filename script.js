@@ -1,147 +1,222 @@
-* {
-  box-sizing: border-box;
-}
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("script.js loaded");
 
-body {
-  margin: 0;
-  font-family: "Helvetica Neue", Arial, sans-serif;
-  background-color: #f4f6f8;
-  color: #222;
-}
+  let products = [];
 
-header {
-  background-color: #263238;
-  color: white;
-  padding: 24px 16px;
-  text-align: center;
-}
+  const productNameInput = document.getElementById("productName");
+  const productPriceInput = document.getElementById("productPrice");
+  const addProductButton = document.getElementById("addProductButton");
+  const productList = document.getElementById("productList");
+  const totalSalesElement = document.getElementById("totalSales");
+  const totalCountElement = document.getElementById("totalCount");
+  const rankingList = document.getElementById("rankingList");
+  const memo = document.getElementById("memo");
 
-header h1 {
-  margin: 0 0 8px;
-  font-size: 24px;
-}
-
-header p {
-  margin: 0;
-  font-size: 14px;
-}
-
-main {
-  max-width: 860px;
-  margin: 24px auto;
-  padding: 0 16px;
-}
-
-.card {
-  background-color: white;
-  padding: 20px;
-  margin-bottom: 16px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.card h2 {
-  margin-top: 0;
-  font-size: 20px;
-  border-left: 5px solid #263238;
-  padding-left: 10px;
-}
-
-.form-area {
-  display: grid;
-  gap: 12px;
-}
-
-label {
-  font-weight: bold;
-}
-
-input,
-textarea {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #ccd1d5;
-  border-radius: 8px;
-  font-size: 16px;
-}
-
-textarea {
-  min-height: 100px;
-  resize: vertical;
-}
-
-button {
-  padding: 12px;
-  background-color: #263238;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-button:hover {
-  opacity: 0.9;
-}
-
-.product-item {
-  display: grid;
-  grid-template-columns: 1fr 140px 140px 80px;
-  gap: 12px;
-  align-items: center;
-  padding: 14px 0;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.product-name {
-  font-weight: bold;
-  font-size: 16px;
-}
-
-.product-price {
-  color: #666;
-  font-size: 14px;
-  margin-top: 4px;
-}
-
-.subtotal {
-  font-weight: bold;
-}
-
-.delete-button {
-  background-color: #b23b3b;
-  padding: 10px;
-  font-size: 14px;
-}
-
-.empty-message {
-  color: #777;
-}
-
-#totalSales,
-#totalCount {
-  font-weight: bold;
-  font-size: 20px;
-}
-
-ol {
-  padding-left: 24px;
-}
-
-li {
-  margin-bottom: 6px;
-}
-
-@media (max-width: 700px) {
-  .product-item {
-    grid-template-columns: 1fr;
+  if (
+    !productNameInput ||
+    !productPriceInput ||
+    !addProductButton ||
+    !productList ||
+    !totalSalesElement ||
+    !totalCountElement ||
+    !rankingList ||
+    !memo
+  ) {
+    console.error("HTMLのidが一致していません。index.htmlのidを確認してください。");
+    return;
   }
 
-  header h1 {
-    font-size: 20px;
+  function loadData() {
+    const savedProducts = localStorage.getItem("products");
+    const savedMemo = localStorage.getItem("memo");
+
+    if (savedProducts) {
+      products = JSON.parse(savedProducts);
+    }
+
+    if (savedMemo) {
+      memo.value = savedMemo;
+    }
+
+    renderProducts();
+    updateResults();
   }
 
-  .card {
-    padding: 16px;
+  function saveData() {
+    localStorage.setItem("products", JSON.stringify(products));
+    localStorage.setItem("memo", memo.value);
   }
-}
+
+  function addProduct() {
+    console.log("商品追加ボタンが押されました");
+
+    const name = productNameInput.value.trim();
+    const price = Number(productPriceInput.value);
+
+    if (name === "") {
+      alert("商品名を入力してください。");
+      return;
+    }
+
+    if (!price || price <= 0) {
+      alert("価格を正しく入力してください。");
+      return;
+    }
+
+    const product = {
+      id: Date.now(),
+      name: name,
+      price: price,
+      count: 0
+    };
+
+    products.push(product);
+
+    productNameInput.value = "";
+    productPriceInput.value = "";
+
+    saveData();
+    renderProducts();
+    updateResults();
+  }
+
+  function renderProducts() {
+    productList.innerHTML = "";
+
+    if (products.length === 0) {
+      productList.innerHTML = '<p class="empty-message">まだ商品が登録されていません。</p>';
+      return;
+    }
+
+    products.forEach((product) => {
+      const item = document.createElement("div");
+      item.className = "product-item";
+
+      item.innerHTML = `
+        <div>
+          <div class="product-name">${product.name}</div>
+          <div class="product-price">${product.price.toLocaleString()}円</div>
+        </div>
+
+        <label>
+          販売数
+          <input
+            type="number"
+            min="0"
+            value="${product.count}"
+            data-id="${product.id}"
+            class="count-input"
+          >
+        </label>
+
+        <div class="subtotal">
+          小計：${(product.price * product.count).toLocaleString()}円
+        </div>
+
+        <button class="delete-button" data-id="${product.id}">
+          削除
+        </button>
+      `;
+
+      productList.appendChild(item);
+    });
+
+    const countInputs = document.querySelectorAll(".count-input");
+    countInputs.forEach((input) => {
+      input.addEventListener("input", updateProductCount);
+    });
+
+    const deleteButtons = document.querySelectorAll(".delete-button");
+    deleteButtons.forEach((button) => {
+      button.addEventListener("click", deleteProduct);
+    });
+  }
+
+  function updateProductCount(event) {
+    const productId = Number(event.target.dataset.id);
+    const newCount = Number(event.target.value);
+
+    products = products.map((product) => {
+      if (product.id === productId) {
+        return {
+          ...product,
+          count: newCount
+        };
+      }
+      return product;
+    });
+
+    saveData();
+    renderProducts();
+    updateResults();
+  }
+
+  function deleteProduct(event) {
+    const productId = Number(event.target.dataset.id);
+
+    const isConfirmed = confirm("この商品を削除しますか？");
+
+    if (!isConfirmed) {
+      return;
+    }
+
+    products = products.filter((product) => product.id !== productId);
+
+    saveData();
+    renderProducts();
+    updateResults();
+  }
+
+  function updateResults() {
+    let totalSales = 0;
+    let totalCount = 0;
+
+    products.forEach((product) => {
+      totalSales += product.price * product.count;
+      totalCount += product.count;
+    });
+
+    totalSalesElement.textContent = totalSales.toLocaleString();
+    totalCountElement.textContent = totalCount.toLocaleString();
+
+    updateRanking();
+  }
+
+  function updateRanking() {
+    rankingList.innerHTML = "";
+
+    if (products.length === 0) {
+      rankingList.innerHTML = "<li>まだデータがありません。</li>";
+      return;
+    }
+
+    const sortedProducts = [...products].sort((a, b) => {
+      return b.price * b.count - a.price * a.count;
+    });
+
+    sortedProducts.forEach((product) => {
+      const sales = product.price * product.count;
+      const li = document.createElement("li");
+      li.textContent = `${product.name}：${sales.toLocaleString()}円`;
+      rankingList.appendChild(li);
+    });
+  }
+
+  addProductButton.addEventListener("click", addProduct);
+
+  productPriceInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      addProduct();
+    }
+  });
+
+  productNameInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      productPriceInput.focus();
+    }
+  });
+
+  memo.addEventListener("input", saveData);
+
+  loadData();
+});
