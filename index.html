@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>学園祭店舗向け売上管理アプリ</title>
   <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
 </head>
 <body>
   <header>
@@ -17,15 +18,11 @@
       <h2>商品登録</h2>
 
       <div class="form-area">
-        <label>
-          商品名
-          <input type="text" id="productName" placeholder="例：焼きそば">
-        </label>
+        <label for="productName">商品名</label>
+        <input type="text" id="productName" placeholder="例：焼きそば">
 
-        <label>
-          価格（円）
-          <input type="number" id="productPrice" placeholder="例：300">
-        </label>
+        <label for="productPrice">価格（円）</label>
+        <input type="number" id="productPrice" placeholder="例：300" min="1">
 
         <button id="addProductButton">商品を追加</button>
       </div>
@@ -55,8 +52,19 @@
       <h2>改善メモ</h2>
       <textarea id="memo" placeholder="例：夕方はセット販売を強化する"></textarea>
     </section>
-  </main>
 
-  <script src="script.js"></script>
+    <section class="card">
+      <h2>現在の機能</h2>
+      <ul>
+        <li>商品名・価格の登録</li>
+        <li>販売数の入力</li>
+        <li>商品別小計の表示</li>
+        <li>総売上・総販売数の自動計算</li>
+        <li>商品別売上ランキングの表示</li>
+        <li>改善メモの保存</li>
+        <li>商品の削除</li>
+      </ul>
+    </section>
+  </main>
 </body>
 </html>
