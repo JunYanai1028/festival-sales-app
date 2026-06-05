@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>学園祭店舗向け売上管理アプリ</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>学園祭店舗向け売上管理アプリ</h1>
+    <p>商品ごとの販売数を入力すると、売上合計とランキングを確認できます。</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>商品登録</h2>
+
+      <div class="form-area">
+        <label>
+          商品名
+          <input type="text" id="productName" placeholder="例：焼きそば">
+        </label>
+
+        <label>
+          価格（円）
+          <input type="number" id="productPrice" placeholder="例：300">
+        </label>
+
+        <button id="addProductButton">商品を追加</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>商品一覧</h2>
+      <div id="productList">
+        <p class="empty-message">まだ商品が登録されていません。</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>売上結果</h2>
+      <p>総売上：<span id="totalSales">0</span>円</p>
+      <p>総販売数：<span id="totalCount">0</span>個</p>
+    </section>
+
+    <section class="card">
+      <h2>商品別売上ランキング</h2>
+      <ol id="rankingList">
+        <li>まだデータがありません。</li>
+      </ol>
+    </section>
+
+    <section class="card">
+      <h2>改善メモ</h2>
+      <textarea id="memo" placeholder="例：夕方はセット販売を強化する"></textarea>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
