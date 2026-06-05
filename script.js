@@ -6,7 +6,7 @@ body {
   margin: 0;
   font-family: "Helvetica Neue", Arial, sans-serif;
   background-color: #f4f6f8;
-  color: #333;
+  color: #222;
 }
 
 header {
@@ -27,7 +27,7 @@ header p {
 }
 
 main {
-  max-width: 800px;
+  max-width: 860px;
   margin: 24px auto;
   padding: 0 16px;
 }
@@ -53,15 +53,13 @@ main {
 }
 
 label {
-  display: grid;
-  gap: 6px;
   font-weight: bold;
 }
 
 input,
 textarea {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   border: 1px solid #ccd1d5;
   border-radius: 8px;
   font-size: 16px;
@@ -88,19 +86,31 @@ button:hover {
 
 .product-item {
   display: grid;
-  grid-template-columns: 1fr 120px 120px;
+  grid-template-columns: 1fr 140px 140px 80px;
   gap: 12px;
   align-items: center;
-  padding: 12px 0;
+  padding: 14px 0;
   border-bottom: 1px solid #e0e0e0;
 }
 
 .product-name {
   font-weight: bold;
+  font-size: 16px;
 }
 
 .product-price {
   color: #666;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.subtotal {
+  font-weight: bold;
+}
+
+.delete-button {
+  background-color: #b23b3b;
+  padding: 10px;
   font-size: 14px;
 }
 
@@ -108,12 +118,30 @@ button:hover {
   color: #777;
 }
 
-@media (max-width: 600px) {
+#totalSales,
+#totalCount {
+  font-weight: bold;
+  font-size: 20px;
+}
+
+ol {
+  padding-left: 24px;
+}
+
+li {
+  margin-bottom: 6px;
+}
+
+@media (max-width: 700px) {
   .product-item {
     grid-template-columns: 1fr;
   }
 
   header h1 {
     font-size: 20px;
+  }
+
+  .card {
+    padding: 16px;
   }
 }
