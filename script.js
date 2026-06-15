@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const salesHistoryList = document.getElementById("salesHistoryList");
   const clearHistoryButton = document.getElementById("clearHistoryButton");
   const hourlySalesChart = document.getElementById("hourlySalesChart");
-  
+
   if (
     !productNameInput ||
     !productPriceInput ||
@@ -39,16 +39,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const savedProducts = localStorage.getItem("products");
     const savedMemo = localStorage.getItem("memo");
     const savedSalesHistory = localStorage.getItem("salesHistory");
-    renderHourlySalesChart();
 
     if (savedProducts) {
       products = JSON.parse(savedProducts);
 
-      // 以前のデータにstockがない場合の補正
       products = products.map((product) => {
         return {
           ...product,
-          stock: product.stock ?? product.count
+          stock: product.stock ?? product.count ?? 0,
+          count: product.count ?? 0
         };
       });
     }
@@ -64,6 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderProducts();
     updateResults();
     renderSalesHistory();
+    renderHourlySalesChart();
   }
 
   function saveData() {
@@ -73,8 +73,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function addProduct() {
-    console.log("商品追加ボタンが押されました");
-
     const name = productNameInput.value.trim();
     const price = Number(productPriceInput.value);
     const stock = Number(productStockInput.value);
@@ -111,6 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
     saveData();
     renderProducts();
     updateResults();
+    renderHourlySalesChart();
   }
 
   function renderProducts() {
@@ -245,7 +244,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function registerSale(event) {
     const productId = Number(event.target.dataset.id);
-
     const product = products.find((item) => item.id === productId);
 
     if (!product) {
@@ -302,7 +300,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function deleteProduct(event) {
     const productId = Number(event.target.dataset.id);
-
     const isConfirmed = confirm("この商品を削除しますか？");
 
     if (!isConfirmed) {
@@ -314,6 +311,7 @@ document.addEventListener("DOMContentLoaded", () => {
     saveData();
     renderProducts();
     updateResults();
+    renderHourlySalesChart();
   }
 
   function updateResults() {
@@ -388,123 +386,127 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
- function renderHourlySalesChart() {
-  hourlySalesChart.innerHTML = "";
+  function renderHourlySalesChart() {
+    hourlySalesChart.innerHTML = "";
 
-  if (salesHistory.length === 0) {
-    hourlySalesChart.innerHTML =
-      '<p class="empty-message">まだグラフに表示できる販売履歴がありません。</p>';
-    return;
+    if (salesHistory.length === 0) {
+      hourlySalesChart.innerHTML =
+        '<p class="empty-message">まだグラフに表示できる販売履歴がありません。</p>';
+      return;
+    }
+
+    const hourlyData = {};
+    const productSet = new Set();
+
+    salesHistory.forEach((record) => {
+      const date = new Date(record.soldAt);
+      const hour = date.getHours();
+      const hourLabel = `${hour}時台`;
+      const productName = record.productName;
+
+      productSet.add(productName);
+
+      if (!hourlyData[hourLabel]) {
+        hourlyData[hourLabel] = {
+          totalSales: 0,
+          products: {}
+        };
+      }
+
+      if (!hourlyData[hourLabel].products[productName]) {
+        hourlyData[hourLabel].products[productName] = 0;
+      }
+
+      hourlyData[hourLabel].products[productName] += record.sales;
+      hourlyData[hourLabel].totalSales += record.sales;
+    });
+
+    const colorPalette = [
+      "#1f4e79",
+      "#4caf50",
+      "#ff9800",
+      "#e91e63",
+      "#9c27b0",
+      "#009688",
+      "#f44336",
+      "#3f51b5",
+      "#795548",
+      "#607d8b"
+    ];
+
+    const productNames = Array.from(productSet);
+    const productColors = {};
+
+    productNames.forEach((productName, index) => {
+      productColors[productName] = colorPalette[index % colorPalette.length];
+    });
+
+    const legend = document.createElement("div");
+    legend.className = "hourly-chart-legend";
+
+    productNames.forEach((productName) => {
+      const legendItem = document.createElement("div");
+      legendItem.className = "hourly-chart-legend-item";
+
+      legendItem.innerHTML = `
+        <span
+          class="hourly-chart-legend-color"
+          style="background-color: ${productColors[productName]};"
+        ></span>
+        <span>${productName}</span>
+      `;
+
+      legend.appendChild(legendItem);
+    });
+
+    hourlySalesChart.appendChild(legend);
+
+    const sortedHourLabels = Object.keys(hourlyData).sort((a, b) => {
+      return Number(a.replace("時台", "")) - Number(b.replace("時台", ""));
+    });
+
+    sortedHourLabels.forEach((hourLabel) => {
+      const hourInfo = hourlyData[hourLabel];
+      const totalSales = hourInfo.totalSales;
+      const products = hourInfo.products;
+
+      const chartItem = document.createElement("div");
+      chartItem.className = "hourly-chart-item";
+
+      const barSegments = Object.keys(products)
+        .map((productName) => {
+          const sales = products[productName];
+          const percentage = (sales / totalSales) * 100;
+          const color = productColors[productName];
+
+          return `
+            <div
+              class="hourly-stacked-bar-segment"
+              style="width: ${percentage}%; background-color: ${color};"
+              title="${productName}：${sales.toLocaleString()}円（${percentage.toFixed(1)}%）"
+            ></div>
+          `;
+        })
+        .join("");
+
+      chartItem.innerHTML = `
+        <div class="hourly-chart-label">${hourLabel}</div>
+
+        <div class="hourly-chart-row">
+          <div class="hourly-stacked-bar">
+            ${barSegments}
+          </div>
+
+          <div class="hourly-chart-total">
+            ${totalSales.toLocaleString()}円
+          </div>
+        </div>
+      `;
+
+      hourlySalesChart.appendChild(chartItem);
+    });
   }
 
-  const hourlyData = {};
-  const productSet = new Set();
-
-  // 時間帯ごと・商品ごとの売上を集計
-  salesHistory.forEach((record) => {
-    const date = new Date(record.soldAt);
-    const hour = date.getHours();
-    const hourLabel = `${hour}時台`;
-    const productName = record.productName;
-
-    productSet.add(productName);
-
-    if (!hourlyData[hourLabel]) {
-      hourlyData[hourLabel] = {
-        totalSales: 0,
-        products: {}
-      };
-    }
-
-    if (!hourlyData[hourLabel].products[productName]) {
-      hourlyData[hourLabel].products[productName] = 0;
-    }
-
-    hourlyData[hourLabel].products[productName] += record.sales;
-    hourlyData[hourLabel].totalSales += record.sales;
-  });
-
-  // 商品ごとの色
-  const colorPalette = [
-    "#1f4e79",
-    "#4caf50",
-    "#ff9800",
-    "#e91e63",
-    "#9c27b0",
-    "#009688",
-    "#f44336",
-    "#3f51b5",
-    "#795548",
-    "#607d8b"
-  ];
-
-  const productNames = Array.from(productSet);
-  const productColors = {};
-
-  productNames.forEach((productName, index) => {
-    productColors[productName] = colorPalette[index % colorPalette.length];
-  });
-
-  // 凡例を作成
-  const legend = document.createElement("div");
-  legend.className = "chart-legend";
-
-  productNames.forEach((productName) => {
-    const legendItem = document.createElement("div");
-    legendItem.className = "chart-legend-item";
-    legendItem.innerHTML = `
-      <span class="chart-legend-color" style="background-color: ${productColors[productName]};"></span>
-      <span>${productName}</span>
-    `;
-    legend.appendChild(legendItem);
-  });
-
-  hourlySalesChart.appendChild(legend);
-
-  // 時間順に並べる
-  const sortedHourLabels = Object.keys(hourlyData).sort((a, b) => {
-    return Number(a.replace("時台", "")) - Number(b.replace("時台", ""));
-  });
-
-  sortedHourLabels.forEach((hourLabel) => {
-    const hourInfo = hourlyData[hourLabel];
-    const totalSales = hourInfo.totalSales;
-    const products = hourInfo.products;
-
-    const chartItem = document.createElement("div");
-    chartItem.className = "chart-item";
-
-    const segmentsHtml = Object.keys(products)
-      .map((productName) => {
-        const sales = products[productName];
-        const percentage = (sales / totalSales) * 100;
-        const color = productColors[productName];
-
-        return `
-          <div
-            class="stacked-bar-segment"
-            style="width: ${percentage}%; background-color: ${color};"
-            title="${productName}：${sales.toLocaleString()}円（${percentage.toFixed(1)}%）"
-          >
-          </div>
-        `;
-      })
-      .join("");
-
-    chartItem.innerHTML = `
-      <div class="chart-label">${hourLabel}</div>
-      <div class="stacked-bar-area">
-        <div class="stacked-bar">
-          ${segmentsHtml}
-        </div>
-        <div class="chart-total">${totalSales.toLocaleString()}円</div>
-      </div>
-    `;
-
-    hourlySalesChart.appendChild(chartItem);
-  });
-}
-  
   function clearSalesHistory() {
     const isConfirmed = confirm("販売履歴をすべて削除しますか？");
 
@@ -521,6 +523,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   addProductButton.addEventListener("click", addProduct);
 
+  productNameInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      productPriceInput.focus();
+    }
+  });
+
   productPriceInput.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
       productStockInput.focus();
@@ -530,12 +538,6 @@ document.addEventListener("DOMContentLoaded", () => {
   productStockInput.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
       addProduct();
-    }
-  });
-
-  productNameInput.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-      productPriceInput.focus();
     }
   });
 
