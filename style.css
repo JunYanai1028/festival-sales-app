@@ -275,4 +275,60 @@ memo.addEventListener("input", saveData);
   margin-top: 12px;
   background-color: #666;
 }
+
+    .section-description {
+  margin-top: -6px;
+  color: #666;
+  font-size: 14px;
+}
+
+.chart-area {
+  margin-top: 16px;
+}
+
+.chart-item {
+  display: grid;
+  grid-template-columns: 70px 1fr;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.chart-label {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.chart-bar-wrapper {
+  background-color: #eef1f4;
+  border-radius: 999px;
+  overflow: hidden;
+  min-height: 28px;
+}
+
+.chart-bar {
+  min-width: 48px;
+  height: 28px;
+  background-color: #1f4e79;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 8px;
+  border-radius: 999px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+  .chart-item {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .chart-bar {
+    font-size: 12px;
+  }
+}
+    
 loadData();
