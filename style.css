@@ -203,5 +203,36 @@ productNameInput.addEventListener("keydown", (event) => {
 });
 
 memo.addEventListener("input", saveData);
+.product-stock {
+  margin-top: 6px;
+  font-size: 14px;
+  color: #555;
+}
 
+.in-stock,
+.low-stock,
+.sold-out {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.in-stock {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.low-stock {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.sold-out {
+  background-color: #f8d7da;
+  color: #842029;
+}
+    
 loadData();
