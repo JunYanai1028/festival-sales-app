@@ -15,7 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const memo = document.getElementById("memo");
   const salesHistoryList = document.getElementById("salesHistoryList");
   const clearHistoryButton = document.getElementById("clearHistoryButton");
-
+  const hourlySalesChart = document.getElementById("hourlySalesChart");
+  
   if (
     !productNameInput ||
     !productPriceInput ||
@@ -27,7 +28,8 @@ document.addEventListener("DOMContentLoaded", () => {
     !rankingList ||
     !memo ||
     !salesHistoryList ||
-    !clearHistoryButton
+    !clearHistoryButton ||
+    !hourlySalesChart
   ) {
     console.error("HTMLのidが一致していません。index.htmlのidを確認してください。");
     return;
@@ -37,6 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const savedProducts = localStorage.getItem("products");
     const savedMemo = localStorage.getItem("memo");
     const savedSalesHistory = localStorage.getItem("salesHistory");
+    renderHourlySalesChart();
 
     if (savedProducts) {
       products = JSON.parse(savedProducts);
@@ -294,6 +297,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderProducts();
     updateResults();
     renderSalesHistory();
+    renderHourlySalesChart();
   }
 
   function deleteProduct(event) {
@@ -384,6 +388,61 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  function renderHourlySalesChart() {
+    hourlySalesChart.innerHTML = "";
+    
+    if (salesHistory.length === 0) {
+      hourlySalesChart.innerHTML =
+        '<p class="empty-message">まだグラフに表示できる販売履歴がありません。</p>';
+      return;
+    }
+    
+    const hourlySales = {};
+    
+    salesHistory.forEach((record) => {
+      const date = new Date(record.soldAt);
+      const hour = date.getHours();
+      const label = `${hour}時台`;
+      
+      if (!hourlySales[label]) {
+        hourlySales[label] = 0;
+      }
+      
+      hourlySales[label] += record.sales;
+    });
+    const chartData = Object.keys(hourlySales)
+      .sort((a, b) => {
+        return Number(a.replace("時台", "")) - Number(b.replace("時台", ""));
+      })
+      .map((label) => {
+        return {
+          label: label,
+          sales: hourlySales[label]
+        };
+      });
+    
+    const maxSales = Math.max(...chartData.map((data) => data.sales));
+    
+    chartData.forEach((data) => {
+      const barWidth = maxSales === 0 ? 0 : (data.sales / maxSales) * 100;
+      
+      const barItem = document.createElement("div");
+      
+      barItem.className = "chart-item";
+      
+      barItem.innerHTML = `
+      <div class="chart-label">${data.label}</div>
+      <div class="chart-bar-wrapper">
+        <div class="chart-bar" style="width: ${barWidth}%;">
+          <span>${data.sales.toLocaleString()}円</span>
+        </div>
+      </div>
+    `;
+
+    hourlySalesChart.appendChild(barItem);
+  });
+}
+  
   function clearSalesHistory() {
     const isConfirmed = confirm("販売履歴をすべて削除しますか？");
 
@@ -395,6 +454,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     saveData();
     renderSalesHistory();
+    renderHourlySalesChart();
   }
 
   addProductButton.addEventListener("click", addProduct);
