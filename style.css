@@ -336,4 +336,86 @@ button:disabled {
   font-weight: bold !important;
   font-size: 14px !important;
 }
+/* =========================
+   時間帯別売上グラフ 修正版
+========================= */
+
+#hourlySalesChart {
+  width: 100%;
+}
+
+.time-sales-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 16px 0 24px;
+}
+
+.time-sales-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.time-sales-legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.time-sales-block {
+  width: 100%;
+  margin-bottom: 28px;
+}
+
+.time-sales-label {
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.time-sales-graph-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 90px;
+  gap: 12px;
+  align-items: center;
+}
+
+.time-sales-bar {
+  width: 100%;
+  height: 42px;
+  min-height: 42px;
+  display: flex;
+  overflow: hidden;
+  border-radius: 999px;
+  background-color: #eef1f4;
+  border: 1px solid #d8dee4;
+}
+
+.time-sales-segment {
+  height: 42px;
+  min-height: 42px;
+  display: block;
+  flex-shrink: 0;
+}
+
+.time-sales-total {
+  text-align: right;
+  font-weight: bold;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+@media (max-width: 800px) {
+  .time-sales-graph-row {
+    grid-template-columns: 1fr;
+  }
+
+  .time-sales-total {
+    text-align: left;
+  }
+}
 }
