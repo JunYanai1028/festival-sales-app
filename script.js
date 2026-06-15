@@ -429,9 +429,7 @@ document.addEventListener("DOMContentLoaded", () => {
     "#9c27b0",
     "#009688",
     "#f44336",
-    "#3f51b5",
-    "#795548",
-    "#607d8b"
+    "#3f51b5"
   ];
 
   const productNames = Array.from(productSet);
@@ -442,20 +440,21 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   const legend = document.createElement("div");
-  legend.className = "hourly-chart-legend";
+  legend.className = "time-sales-legend";
 
   productNames.forEach((productName) => {
     const legendItem = document.createElement("div");
-    legendItem.className = "hourly-chart-legend-item";
+    legendItem.className = "time-sales-legend-item";
 
-    legendItem.innerHTML = `
-      <span
-        class="hourly-chart-legend-color"
-        style="background-color: ${productColors[productName]};"
-      ></span>
-      <span>${productName}</span>
-    `;
+    const colorBox = document.createElement("span");
+    colorBox.className = "time-sales-legend-color";
+    colorBox.style.backgroundColor = productColors[productName];
 
+    const nameText = document.createElement("span");
+    nameText.textContent = productName;
+
+    legendItem.appendChild(colorBox);
+    legendItem.appendChild(nameText);
     legend.appendChild(legendItem);
   });
 
@@ -470,25 +469,25 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalSales = hourInfo.totalSales;
     const products = hourInfo.products;
 
-    const chartItem = document.createElement("div");
-    chartItem.className = "hourly-chart-item";
+    const block = document.createElement("div");
+    block.className = "time-sales-block";
 
     const label = document.createElement("div");
-    label.className = "hourly-chart-label";
+    label.className = "time-sales-label";
     label.textContent = hourLabel;
 
-    const row = document.createElement("div");
-    row.className = "hourly-chart-row";
+    const graphRow = document.createElement("div");
+    graphRow.className = "time-sales-graph-row";
 
     const bar = document.createElement("div");
-    bar.className = "hourly-stacked-bar";
+    bar.className = "time-sales-bar";
 
     Object.keys(products).forEach((productName) => {
       const sales = products[productName];
       const percentage = (sales / totalSales) * 100;
 
       const segment = document.createElement("div");
-      segment.className = "hourly-stacked-bar-segment";
+      segment.className = "time-sales-segment";
       segment.style.width = `${percentage}%`;
       segment.style.backgroundColor = productColors[productName];
       segment.title = `${productName}：${sales.toLocaleString()}円（${percentage.toFixed(1)}%）`;
@@ -497,16 +496,16 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const total = document.createElement("div");
-    total.className = "hourly-chart-total";
+    total.className = "time-sales-total";
     total.textContent = `${totalSales.toLocaleString()}円`;
 
-    row.appendChild(bar);
-    row.appendChild(total);
+    graphRow.appendChild(bar);
+    graphRow.appendChild(total);
 
-    chartItem.appendChild(label);
-    chartItem.appendChild(row);
+    block.appendChild(label);
+    block.appendChild(graphRow);
 
-    hourlySalesChart.appendChild(chartItem);
+    hourlySalesChart.appendChild(block);
   });
 }
   function clearSalesHistory() {
