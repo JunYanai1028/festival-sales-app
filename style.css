@@ -234,5 +234,45 @@ memo.addEventListener("input", saveData);
   background-color: #f8d7da;
   color: #842029;
 }
-    
+
+.sale-area {
+  display: grid;
+  gap: 8px;
+}
+
+.sale-button {
+  background-color: #2e7d32;
+}
+
+.sale-button:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
+}
+
+.sale-quantity-input:disabled {
+  background-color: #eee;
+}
+
+.history-item {
+  padding: 12px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.history-main {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.history-time {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #666;
+}
+
+.clear-button {
+  margin-top: 12px;
+  background-color: #666;
+}
 loadData();
