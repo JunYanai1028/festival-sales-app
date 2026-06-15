@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const productNameInput = document.getElementById("productName");
   const productPriceInput = document.getElementById("productPrice");
+  const productStockInput = document.getElementById("productStock");
   const addProductButton = document.getElementById("addProductButton");
   const productList = document.getElementById("productList");
   const totalSalesElement = document.getElementById("totalSales");
@@ -15,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (
     !productNameInput ||
     !productPriceInput ||
+    !productStockInput ||
     !addProductButton ||
     !productList ||
     !totalSalesElement ||
@@ -32,6 +34,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (savedProducts) {
       products = JSON.parse(savedProducts);
+        // 以前のデータにstockがない場合の補正
+      products = products.map((product) => {
+        return {
+          ...product,
+          stock: product.stock ?? product.count
+        };
+      });
     }
 
     if (savedMemo) {
@@ -52,7 +61,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const name = productNameInput.value.trim();
     const price = Number(productPriceInput.value);
-
+    const stock = Number(productStockInput.value);
+    
     if (name === "") {
       alert("商品名を入力してください。");
       return;
@@ -63,10 +73,16 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    if (!stock || stock <= 0) {
+      alert("在庫数を正しく入力してください。");
+      return;
+    }
+    
     const product = {
       id: Date.now(),
       name: name,
       price: price,
+      stock: stock,
       count: 0
     };
 
@@ -74,7 +90,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     productNameInput.value = "";
     productPriceInput.value = "";
-
+    productStockInput.value = "";
+    
     saveData();
     renderProducts();
     updateResults();
@@ -89,6 +106,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     products.forEach((product) => {
+       const remainingStock = product.stock - product.count;
+
+      let stockStatus = "";
+      let stockStatusClass = "";
+
+      if (remainingStock === 0) {
+        stockStatus = "完売";
+        stockStatusClass = "sold-out";
+      } else if (remainingStock <= 5) {
+        stockStatus = "残りわずか";
+        stockStatusClass = "low-stock";
+      } else {
+        stockStatus = "販売中";
+        stockStatusClass = "in-stock";
+      }
+      
       const item = document.createElement("div");
       item.className = "product-item";
 
@@ -96,6 +129,10 @@ document.addEventListener("DOMContentLoaded", () => {
         <div>
           <div class="product-name">${product.name}</div>
           <div class="product-price">${product.price.toLocaleString()}円</div>
+           <div class="product-stock">
+            在庫：${product.stock}個 ／ 残り：${remainingStock}個
+            <span class="${stockStatusClass}">${stockStatus}</span>
+          </div>
         </div>
 
         <label>
@@ -103,6 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <input
             type="number"
             min="0"
+            max="${product.stock}"
             value="${product.count}"
             data-id="${product.id}"
             class="count-input"
@@ -134,15 +172,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function updateProductCount(event) {
     const productId = Number(event.target.dataset.id);
-    const newCount = Number(event.target.value);
+    let newCount = Number(event.target.value);
 
     products = products.map((product) => {
       if (product.id === productId) {
+        if (newCount < 0) {
+          newCount = 0;
+        }
+
+        if (newCount > product.stock) {
+          alert("販売数が在庫数を超えています。");
+          newCount = product.stock;
+        }
+
         return {
           ...product,
           count: newCount
         };
       }
+
       return product;
     });
 
@@ -150,6 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderProducts();
     updateResults();
   }
+
 
   function deleteProduct(event) {
     const productId = Number(event.target.dataset.id);
@@ -196,8 +245,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     sortedProducts.forEach((product) => {
       const sales = product.price * product.count;
+      const remainingStock = product.stock - product.count;
+
       const li = document.createElement("li");
-      li.textContent = `${product.name}：${sales.toLocaleString()}円`;
+      li.textContent = `${product.name}：${sales.toLocaleString()}円（残り${remainingStock}個）`;
       rankingList.appendChild(li);
     });
   }
@@ -205,6 +256,12 @@ document.addEventListener("DOMContentLoaded", () => {
   addProductButton.addEventListener("click", addProduct);
 
   productPriceInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      productStockInput.focus();
+    }
+  });
+
+  productStockInput.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
       addProduct();
     }
