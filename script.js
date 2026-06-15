@@ -388,58 +388,120 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function renderHourlySalesChart() {
-    hourlySalesChart.innerHTML = "";
-    
-    if (salesHistory.length === 0) {
-      hourlySalesChart.innerHTML =
-        '<p class="empty-message">まだグラフに表示できる販売履歴がありません。</p>';
-      return;
+ function renderHourlySalesChart() {
+  hourlySalesChart.innerHTML = "";
+
+  if (salesHistory.length === 0) {
+    hourlySalesChart.innerHTML =
+      '<p class="empty-message">まだグラフに表示できる販売履歴がありません。</p>';
+    return;
+  }
+
+  const hourlyData = {};
+  const productSet = new Set();
+
+  // 時間帯ごと・商品ごとの売上を集計
+  salesHistory.forEach((record) => {
+    const date = new Date(record.soldAt);
+    const hour = date.getHours();
+    const hourLabel = `${hour}時台`;
+    const productName = record.productName;
+
+    productSet.add(productName);
+
+    if (!hourlyData[hourLabel]) {
+      hourlyData[hourLabel] = {
+        totalSales: 0,
+        products: {}
+      };
     }
-    
-    const hourlySales = {};
-    
-    salesHistory.forEach((record) => {
-      const date = new Date(record.soldAt);
-      const hour = date.getHours();
-      const label = `${hour}時台`;
-      
-      if (!hourlySales[label]) {
-        hourlySales[label] = 0;
-      }
-      
-      hourlySales[label] += record.sales;
-    });
-    const chartData = Object.keys(hourlySales)
-      .sort((a, b) => {
-        return Number(a.replace("時台", "")) - Number(b.replace("時台", ""));
+
+    if (!hourlyData[hourLabel].products[productName]) {
+      hourlyData[hourLabel].products[productName] = 0;
+    }
+
+    hourlyData[hourLabel].products[productName] += record.sales;
+    hourlyData[hourLabel].totalSales += record.sales;
+  });
+
+  // 商品ごとの色
+  const colorPalette = [
+    "#1f4e79",
+    "#4caf50",
+    "#ff9800",
+    "#e91e63",
+    "#9c27b0",
+    "#009688",
+    "#f44336",
+    "#3f51b5",
+    "#795548",
+    "#607d8b"
+  ];
+
+  const productNames = Array.from(productSet);
+  const productColors = {};
+
+  productNames.forEach((productName, index) => {
+    productColors[productName] = colorPalette[index % colorPalette.length];
+  });
+
+  // 凡例を作成
+  const legend = document.createElement("div");
+  legend.className = "chart-legend";
+
+  productNames.forEach((productName) => {
+    const legendItem = document.createElement("div");
+    legendItem.className = "chart-legend-item";
+    legendItem.innerHTML = `
+      <span class="chart-legend-color" style="background-color: ${productColors[productName]};"></span>
+      <span>${productName}</span>
+    `;
+    legend.appendChild(legendItem);
+  });
+
+  hourlySalesChart.appendChild(legend);
+
+  // 時間順に並べる
+  const sortedHourLabels = Object.keys(hourlyData).sort((a, b) => {
+    return Number(a.replace("時台", "")) - Number(b.replace("時台", ""));
+  });
+
+  sortedHourLabels.forEach((hourLabel) => {
+    const hourInfo = hourlyData[hourLabel];
+    const totalSales = hourInfo.totalSales;
+    const products = hourInfo.products;
+
+    const chartItem = document.createElement("div");
+    chartItem.className = "chart-item";
+
+    const segmentsHtml = Object.keys(products)
+      .map((productName) => {
+        const sales = products[productName];
+        const percentage = (sales / totalSales) * 100;
+        const color = productColors[productName];
+
+        return `
+          <div
+            class="stacked-bar-segment"
+            style="width: ${percentage}%; background-color: ${color};"
+            title="${productName}：${sales.toLocaleString()}円（${percentage.toFixed(1)}%）"
+          >
+          </div>
+        `;
       })
-      .map((label) => {
-        return {
-          label: label,
-          sales: hourlySales[label]
-        };
-      });
-    
-    const maxSales = Math.max(...chartData.map((data) => data.sales));
-    
-    chartData.forEach((data) => {
-      const barWidth = maxSales === 0 ? 0 : (data.sales / maxSales) * 100;
-      
-      const barItem = document.createElement("div");
-      
-      barItem.className = "chart-item";
-      
-      barItem.innerHTML = `
-      <div class="chart-label">${data.label}</div>
-      <div class="chart-bar-wrapper">
-        <div class="chart-bar" style="width: ${barWidth}%;">
-          <span>${data.sales.toLocaleString()}円</span>
+      .join("");
+
+    chartItem.innerHTML = `
+      <div class="chart-label">${hourLabel}</div>
+      <div class="stacked-bar-area">
+        <div class="stacked-bar">
+          ${segmentsHtml}
         </div>
+        <div class="chart-total">${totalSales.toLocaleString()}円</div>
       </div>
     `;
 
-    hourlySalesChart.appendChild(barItem);
+    hourlySalesChart.appendChild(chartItem);
   });
 }
   
