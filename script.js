@@ -386,127 +386,129 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function renderHourlySalesChart() {
-    hourlySalesChart.innerHTML = "";
+ function renderHourlySalesChart() {
+  hourlySalesChart.innerHTML = "";
 
-    if (salesHistory.length === 0) {
-      hourlySalesChart.innerHTML =
-        '<p class="empty-message">まだグラフに表示できる販売履歴がありません。</p>';
-      return;
-    }
-
-    const hourlyData = {};
-    const productSet = new Set();
-
-    salesHistory.forEach((record) => {
-      const date = new Date(record.soldAt);
-      const hour = date.getHours();
-      const hourLabel = `${hour}時台`;
-      const productName = record.productName;
-
-      productSet.add(productName);
-
-      if (!hourlyData[hourLabel]) {
-        hourlyData[hourLabel] = {
-          totalSales: 0,
-          products: {}
-        };
-      }
-
-      if (!hourlyData[hourLabel].products[productName]) {
-        hourlyData[hourLabel].products[productName] = 0;
-      }
-
-      hourlyData[hourLabel].products[productName] += record.sales;
-      hourlyData[hourLabel].totalSales += record.sales;
-    });
-
-    const colorPalette = [
-      "#1f4e79",
-      "#4caf50",
-      "#ff9800",
-      "#e91e63",
-      "#9c27b0",
-      "#009688",
-      "#f44336",
-      "#3f51b5",
-      "#795548",
-      "#607d8b"
-    ];
-
-    const productNames = Array.from(productSet);
-    const productColors = {};
-
-    productNames.forEach((productName, index) => {
-      productColors[productName] = colorPalette[index % colorPalette.length];
-    });
-
-    const legend = document.createElement("div");
-    legend.className = "hourly-chart-legend";
-
-    productNames.forEach((productName) => {
-      const legendItem = document.createElement("div");
-      legendItem.className = "hourly-chart-legend-item";
-
-      legendItem.innerHTML = `
-        <span
-          class="hourly-chart-legend-color"
-          style="background-color: ${productColors[productName]};"
-        ></span>
-        <span>${productName}</span>
-      `;
-
-      legend.appendChild(legendItem);
-    });
-
-    hourlySalesChart.appendChild(legend);
-
-    const sortedHourLabels = Object.keys(hourlyData).sort((a, b) => {
-      return Number(a.replace("時台", "")) - Number(b.replace("時台", ""));
-    });
-
-    sortedHourLabels.forEach((hourLabel) => {
-      const hourInfo = hourlyData[hourLabel];
-      const totalSales = hourInfo.totalSales;
-      const products = hourInfo.products;
-
-      const chartItem = document.createElement("div");
-      chartItem.className = "hourly-chart-item";
-
-      const barSegments = Object.keys(products)
-        .map((productName) => {
-          const sales = products[productName];
-          const percentage = (sales / totalSales) * 100;
-          const color = productColors[productName];
-
-          return `
-            <div
-              class="hourly-stacked-bar-segment"
-              style="width: ${percentage}%; background-color: ${color};"
-              title="${productName}：${sales.toLocaleString()}円（${percentage.toFixed(1)}%）"
-            ></div>
-          `;
-        })
-        .join("");
-
-      chartItem.innerHTML = `
-        <div class="hourly-chart-label">${hourLabel}</div>
-
-        <div class="hourly-chart-row">
-          <div class="hourly-stacked-bar">
-            ${barSegments}
-          </div>
-
-          <div class="hourly-chart-total">
-            ${totalSales.toLocaleString()}円
-          </div>
-        </div>
-      `;
-
-      hourlySalesChart.appendChild(chartItem);
-    });
+  if (salesHistory.length === 0) {
+    hourlySalesChart.innerHTML =
+      '<p class="empty-message">まだグラフに表示できる販売履歴がありません。</p>';
+    return;
   }
 
+  const hourlyData = {};
+  const productSet = new Set();
+
+  salesHistory.forEach((record) => {
+    const date = new Date(record.soldAt);
+    const hour = date.getHours();
+    const hourLabel = `${hour}時台`;
+    const productName = record.productName;
+
+    productSet.add(productName);
+
+    if (!hourlyData[hourLabel]) {
+      hourlyData[hourLabel] = {
+        totalSales: 0,
+        products: {}
+      };
+    }
+
+    if (!hourlyData[hourLabel].products[productName]) {
+      hourlyData[hourLabel].products[productName] = 0;
+    }
+
+    hourlyData[hourLabel].products[productName] += record.sales;
+    hourlyData[hourLabel].totalSales += record.sales;
+  });
+
+  const colorPalette = [
+    "#1f4e79",
+    "#4caf50",
+    "#ff9800",
+    "#e91e63",
+    "#9c27b0",
+    "#009688",
+    "#f44336",
+    "#3f51b5",
+    "#795548",
+    "#607d8b"
+  ];
+
+  const productNames = Array.from(productSet);
+  const productColors = {};
+
+  productNames.forEach((productName, index) => {
+    productColors[productName] = colorPalette[index % colorPalette.length];
+  });
+
+  const legend = document.createElement("div");
+  legend.className = "hourly-chart-legend";
+
+  productNames.forEach((productName) => {
+    const legendItem = document.createElement("div");
+    legendItem.className = "hourly-chart-legend-item";
+
+    legendItem.innerHTML = `
+      <span
+        class="hourly-chart-legend-color"
+        style="background-color: ${productColors[productName]};"
+      ></span>
+      <span>${productName}</span>
+    `;
+
+    legend.appendChild(legendItem);
+  });
+
+  hourlySalesChart.appendChild(legend);
+
+  const sortedHourLabels = Object.keys(hourlyData).sort((a, b) => {
+    return Number(a.replace("時台", "")) - Number(b.replace("時台", ""));
+  });
+
+  sortedHourLabels.forEach((hourLabel) => {
+    const hourInfo = hourlyData[hourLabel];
+    const totalSales = hourInfo.totalSales;
+    const products = hourInfo.products;
+
+    const chartItem = document.createElement("div");
+    chartItem.className = "hourly-chart-item";
+
+    const label = document.createElement("div");
+    label.className = "hourly-chart-label";
+    label.textContent = hourLabel;
+
+    const row = document.createElement("div");
+    row.className = "hourly-chart-row";
+
+    const bar = document.createElement("div");
+    bar.className = "hourly-stacked-bar";
+
+    Object.keys(products).forEach((productName) => {
+      const sales = products[productName];
+      const percentage = (sales / totalSales) * 100;
+
+      const segment = document.createElement("div");
+      segment.className = "hourly-stacked-bar-segment";
+      segment.style.width = `${percentage}%`;
+      segment.style.backgroundColor = productColors[productName];
+      segment.title = `${productName}：${sales.toLocaleString()}円（${percentage.toFixed(1)}%）`;
+
+      bar.appendChild(segment);
+    });
+
+    const total = document.createElement("div");
+    total.className = "hourly-chart-total";
+    total.textContent = `${totalSales.toLocaleString()}円`;
+
+    row.appendChild(bar);
+    row.appendChild(total);
+
+    chartItem.appendChild(label);
+    chartItem.appendChild(row);
+
+    hourlySalesChart.appendChild(chartItem);
+  });
+}
   function clearSalesHistory() {
     const isConfirmed = confirm("販売履歴をすべて削除しますか？");
 
