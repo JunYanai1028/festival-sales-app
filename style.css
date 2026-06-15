@@ -1,208 +1,114 @@
-let products = [];
-
-const productNameInput = document.getElementById("productName");
-const productPriceInput = document.getElementById("productPrice");
-const addProductButton = document.getElementById("addProductButton");
-const productList = document.getElementById("productList");
-const totalSalesElement = document.getElementById("totalSales");
-const totalCountElement = document.getElementById("totalCount");
-const rankingList = document.getElementById("rankingList");
-const memo = document.getElementById("memo");
-
-function loadData() {
-  const savedProducts = localStorage.getItem("products");
-  const savedMemo = localStorage.getItem("memo");
-
-  if (savedProducts) {
-    products = JSON.parse(savedProducts);
-  }
-
-  if (savedMemo) {
-    memo.value = savedMemo;
-  }
-
-  renderProducts();
-  updateResults();
+* {
+  box-sizing: border-box;
 }
 
-function saveData() {
-  localStorage.setItem("products", JSON.stringify(products));
-  localStorage.setItem("memo", memo.value);
+body {
+  margin: 0;
+  font-family: Arial, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  background-color: #f4f6f8;
+  color: #333;
 }
 
-function addProduct() {
-  const name = productNameInput.value.trim();
-  const price = Number(productPriceInput.value);
-
-  if (name === "") {
-    alert("商品名を入力してください。");
-    return;
-  }
-
-  if (!price || price <= 0) {
-    alert("価格を正しく入力してください。");
-    return;
-  }
-
-  const product = {
-    id: Date.now(),
-    name: name,
-    price: price,
-    count: 0
-  };
-
-  products.push(product);
-
-  productNameInput.value = "";
-  productPriceInput.value = "";
-
-  saveData();
-  renderProducts();
-  updateResults();
+header {
+  background-color: #1f4e79;
+  color: white;
+  padding: 28px 16px;
+  text-align: center;
 }
 
-function renderProducts() {
-  productList.innerHTML = "";
-
-  if (products.length === 0) {
-    productList.innerHTML = '<p class="empty-message">まだ商品が登録されていません。</p>';
-    return;
-  }
-
-  products.forEach((product) => {
-    const item = document.createElement("div");
-    item.className = "product-item";
-
-    item.innerHTML = `
-      <div>
-        <div class="product-name">${product.name}</div>
-        <div class="product-price">${product.price.toLocaleString()}円</div>
-      </div>
-
-      <label>
-        販売数
-        <input
-          type="number"
-          min="0"
-          value="${product.count}"
-          data-id="${product.id}"
-          class="count-input"
-        >
-      </label>
-
-      <div class="subtotal">
-        小計：${(product.price * product.count).toLocaleString()}円
-      </div>
-
-      <button class="delete-button" data-id="${product.id}">
-        削除
-      </button>
-    `;
-
-    productList.appendChild(item);
-  });
-
-  const countInputs = document.querySelectorAll(".count-input");
-
-  countInputs.forEach((input) => {
-    input.addEventListener("input", updateProductCount);
-  });
-
-  const deleteButtons = document.querySelectorAll(".delete-button");
-
-  deleteButtons.forEach((button) => {
-    button.addEventListener("click", deleteProduct);
-  });
+header h1 {
+  margin: 0 0 10px;
+  font-size: 28px;
 }
 
-function updateProductCount(event) {
-  const productId = Number(event.target.dataset.id);
-  const newCount = Number(event.target.value);
-
-  products = products.map((product) => {
-    if (product.id === productId) {
-      return {
-        ...product,
-        count: newCount
-      };
-    }
-
-    return product;
-  });
-
-  saveData();
-  renderProducts();
-  updateResults();
+header p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.7;
 }
 
-function deleteProduct(event) {
-  const productId = Number(event.target.dataset.id);
-
-  const isConfirmed = confirm("この商品を削除しますか？");
-
-  if (!isConfirmed) {
-    return;
-  }
-
-  products = products.filter((product) => product.id !== productId);
-
-  saveData();
-  renderProducts();
-  updateResults();
+main {
+  width: min(980px, 92%);
+  margin: 24px auto;
 }
 
-function updateResults() {
-  let totalSales = 0;
-  let totalCount = 0;
-
-  products.forEach((product) => {
-    totalSales += product.price * product.count;
-    totalCount += product.count;
-  });
-
-  totalSalesElement.textContent = totalSales.toLocaleString();
-  totalCountElement.textContent = totalCount.toLocaleString();
-
-  updateRanking();
+.card {
+  background-color: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-function updateRanking() {
-  rankingList.innerHTML = "";
-
-  if (products.length === 0) {
-    rankingList.innerHTML = "<li>まだデータがありません。</li>";
-    return;
-  }
-
-  const sortedProducts = [...products].sort((a, b) => {
-    return b.price * b.count - a.price * a.count;
-  });
-
-  sortedProducts.forEach((product) => {
-    const sales = product.price * product.count;
-    const li = document.createElement("li");
-
-    li.textContent = `${product.name}：${sales.toLocaleString()}円`;
-
-    rankingList.appendChild(li);
-  });
+.card h2 {
+  margin-top: 0;
+  font-size: 20px;
+  border-left: 5px solid #1f4e79;
+  padding-left: 10px;
 }
 
-addProductButton.addEventListener("click", addProduct);
+.form-area {
+  display: grid;
+  gap: 10px;
+}
 
-productPriceInput.addEventListener("keydown", (event) => {
-  if (event.key === "Enter") {
-    addProduct();
-  }
-});
+input,
+textarea,
+button {
+  font-size: 16px;
+}
 
-productNameInput.addEventListener("keydown", (event) => {
-  if (event.key === "Enter") {
-    productPriceInput.focus();
-  }
-});
+input,
+textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
 
-memo.addEventListener("input", saveData);
+textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background-color: #1f4e79;
+  color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+button:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
+}
+
+.product-item {
+  display: grid;
+  grid-template-columns: 1.5fr 0.9fr 1fr 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.product-name {
+  font-weight: bold;
+  font-size: 17px;
+}
+
+.product-price {
+  color: #666;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
 .product-stock {
   margin-top: 6px;
   font-size: 14px;
@@ -244,13 +150,90 @@ memo.addEventListener("input", saveData);
   background-color: #2e7d32;
 }
 
-.sale-button:disabled {
-  background-color: #aaa;
-  cursor: not-allowed;
-}
-
 .sale-quantity-input:disabled {
   background-color: #eee;
+}
+
+.subtotal {
+  font-weight: bold;
+}
+
+.delete-button {
+  background-color: #c0392b;
+}
+
+.empty-message {
+  color: #777;
+}
+
+.section-description {
+  margin-top: -6px;
+  color: #666;
+  font-size: 14px;
+}
+
+.chart-area {
+  margin-top: 16px;
+}
+
+.hourly-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 16px 0 20px;
+}
+
+.hourly-chart-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.hourly-chart-legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.hourly-chart-item {
+  margin-bottom: 24px;
+}
+
+.hourly-chart-label {
+  font-weight: bold;
+  margin-bottom: 8px;
+  font-size: 15px;
+}
+
+.hourly-chart-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.hourly-stacked-bar {
+  flex: 1;
+  height: 42px;
+  display: flex;
+  overflow: hidden;
+  border-radius: 999px;
+  background-color: #eef1f4;
+  min-width: 200px;
+}
+
+.hourly-stacked-bar-segment {
+  height: 100%;
+  min-width: 4px;
+}
+
+.hourly-chart-total {
+  width: 90px;
+  text-align: right;
+  font-weight: bold;
+  font-size: 14px;
 }
 
 .history-item {
@@ -276,186 +259,23 @@ memo.addEventListener("input", saveData);
   background-color: #666;
 }
 
-    .section-description {
-  margin-top: -6px;
-  color: #666;
-  font-size: 14px;
-}
-
-.chart-area {
-  margin-top: 16px;
-}
-
-.chart-item {
-  display: grid;
-  grid-template-columns: 70px 1fr;
-  gap: 12px;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.chart-label {
-  font-weight: bold;
-  font-size: 14px;
-}
-
-.chart-bar-wrapper {
-  background-color: #eef1f4;
-  border-radius: 999px;
-  overflow: hidden;
-  min-height: 28px;
-}
-
-.chart-bar {
-  min-width: 48px;
-  height: 28px;
-  background-color: #1f4e79;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding-right: 8px;
-  border-radius: 999px;
-  font-size: 13px;
-  white-space: nowrap;
-}
-
-@media (max-width: 700px) {
-  .chart-item {
+@media (max-width: 800px) {
+  .product-item {
     grid-template-columns: 1fr;
-    gap: 6px;
+    align-items: stretch;
   }
 
-  .chart-bar {
-    font-size: 12px;
-  }
-}
-
-    .chart-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.chart-legend-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-}
-
-.chart-legend-color {
-  width: 14px;
-  height: 14px;
-  border-radius: 3px;
-  display: inline-block;
-}
-
-.stacked-bar-area {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.stacked-bar {
-  flex: 1;
-  height: 42px;
-  display: flex;
-  overflow: hidden;
-  border-radius: 999px;
-  background-color: #eef1f4;
-}
-
-.stacked-bar-segment {
-  height: 100%;
-}
-
-.chart-total {
-  min-width: 90px;
-  text-align: right;
-  font-weight: bold;
-  font-size: 14px;
-}
-
-@media (max-width: 700px) {
-  .stacked-bar-area {
+  .hourly-chart-row {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .chart-total {
+  .hourly-chart-total {
+    width: auto;
     text-align: left;
-    min-width: auto;
-  }
-}
-
-    .chart-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.chart-legend-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-}
-
-.chart-legend-color {
-  width: 16px;
-  height: 16px;
-  border-radius: 4px;
-  display: inline-block;
-}
-
-.chart-item {
-  margin-bottom: 22px;
-}
-
-.chart-label {
-  font-weight: bold;
-  margin-bottom: 8px;
-}
-
-.stacked-bar-area {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.stacked-bar {
-  flex: 1;
-  height: 42px;
-  display: flex;
-  overflow: hidden;
-  border-radius: 999px;
-  background-color: #eef1f4;
-}
-
-.stacked-bar-segment {
-  height: 100%;
-  min-width: 4px;
-}
-
-.chart-total {
-  min-width: 90px;
-  text-align: right;
-  font-weight: bold;
-  font-size: 14px;
-}
-
-@media (max-width: 700px) {
-  .stacked-bar-area {
-    flex-direction: column;
-    align-items: stretch;
   }
 
-  .chart-total {
-    text-align: left;
-    min-width: auto;
+  header h1 {
+    font-size: 22px;
   }
 }
-loadData();
