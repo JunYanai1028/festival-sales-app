@@ -180,77 +180,73 @@ button:disabled {
   margin-top: 16px;
 }
 
-.hourly-chart-legend {
+#hourlySalesChart {
+  width: 100%;
+}
+
+.time-sales-legend {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  margin: 16px 0 20px;
+  margin: 16px 0 24px;
 }
 
-.hourly-chart-legend-item {
+.time-sales-legend-item {
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: 14px;
 }
 
-.hourly-chart-legend-color {
+.time-sales-legend-color {
   width: 16px;
   height: 16px;
   border-radius: 4px;
   display: inline-block;
 }
 
-.hourly-chart-item {
+.time-sales-block {
+  width: 100%;
   margin-bottom: 28px;
 }
 
-.hourly-chart-label {
+.time-sales-label {
   font-weight: bold;
-  margin-bottom: 8px;
   font-size: 16px;
+  margin-bottom: 10px;
 }
 
-.hourly-chart-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.time-sales-graph-row {
   width: 100%;
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) 90px;
+  gap: 12px;
+  align-items: center;
 }
 
-.hourly-stacked-bar {
-  flex: 1;
+.time-sales-bar {
+  width: 100%;
   height: 42px;
+  min-height: 42px;
   display: flex;
   overflow: hidden;
   border-radius: 999px;
   background-color: #eef1f4;
-  min-width: 240px;
   border: 1px solid #d8dee4;
 }
 
-.hourly-stacked-bar-segment {
-  height: 100%;
+.time-sales-segment {
+  height: 42px;
+  min-height: 42px;
   display: block;
+  flex-shrink: 0;
 }
 
-.hourly-chart-total {
-  width: 90px;
+.time-sales-total {
   text-align: right;
   font-weight: bold;
   font-size: 14px;
-}
-
-@media (max-width: 800px) {
-  .hourly-chart-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .hourly-chart-total {
-    width: auto;
-    text-align: left;
-  }
+  white-space: nowrap;
 }
 
 /* =========================
@@ -290,214 +286,15 @@ button:disabled {
     align-items: stretch;
   }
 
-  .hourly-chart-row {
-    flex-direction: column;
-    align-items: stretch;
+  .time-sales-graph-row {
+    grid-template-columns: 1fr;
   }
 
-  .hourly-chart-total {
-    width: auto;
+  .time-sales-total {
     text-align: left;
   }
 
   header h1 {
     font-size: 22px;
-  }
-  #hourlySalesChart .hourly-chart-row {
-  display: flex !important;
-  align-items: center !important;
-  gap: 12px !important;
-  width: 100% !important;
-}
-
-#hourlySalesChart .hourly-stacked-bar {
-  display: flex !important;
-  flex: 1 !important;
-  width: 100% !important;
-  height: 42px !important;
-  min-height: 42px !important;
-  min-width: 240px !important;
-  overflow: hidden !important;
-  border-radius: 999px !important;
-  background-color: #eef1f4 !important;
-  border: 1px solid #d8dee4 !important;
-}
-
-#hourlySalesChart .hourly-stacked-bar-segment {
-  display: block !important;
-  height: 42px !important;
-  min-height: 42px !important;
-  flex-shrink: 0 !important;
-}
-
-#hourlySalesChart .hourly-chart-total {
-  width: 90px !important;
-  text-align: right !important;
-  font-weight: bold !important;
-  font-size: 14px !important;
-}
-/* =========================
-   時間帯別売上グラフ 修正版
-========================= */
-
-#hourlySalesChart {
-  width: 100%;
-}
-
-.time-sales-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin: 16px 0 24px;
-}
-
-.time-sales-legend-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-}
-
-.time-sales-legend-color {
-  width: 16px;
-  height: 16px;
-  border-radius: 4px;
-  display: inline-block;
-}
-
-.time-sales-block {
-  width: 100%;
-  margin-bottom: 28px;
-}
-
-.time-sales-label {
-  font-weight: bold;
-  font-size: 16px;
-  margin-bottom: 10px;
-}
-
-.time-sales-graph-row {
-  width: 100%;
-  display: grid;
-  grid-template-columns: 1fr 90px;
-  gap: 12px;
-  align-items: center;
-}
-
-.time-sales-bar {
-  width: 100%;
-  height: 42px;
-  min-height: 42px;
-  display: flex;
-  overflow: hidden;
-  border-radius: 999px;
-  background-color: #eef1f4;
-  border: 1px solid #d8dee4;
-}
-
-.time-sales-segment {
-  height: 42px;
-  min-height: 42px;
-  display: block;
-  flex-shrink: 0;
-}
-
-.time-sales-total {
-  text-align: right;
-  font-weight: bold;
-  font-size: 14px;
-  white-space: nowrap;
-}
-
-@media (max-width: 800px) {
-  .time-sales-graph-row {
-    grid-template-columns: 1fr;
-  }
-
-  .time-sales-total {
-    text-align: left;
-  }
-}
-}
-/* =========================
-   時間帯別売上グラフ 修正版
-========================= */
-
-#hourlySalesChart {
-  width: 100%;
-}
-
-.time-sales-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin: 16px 0 24px;
-}
-
-.time-sales-legend-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-}
-
-.time-sales-legend-color {
-  width: 16px;
-  height: 16px;
-  border-radius: 4px;
-  display: inline-block;
-}
-
-.time-sales-block {
-  width: 100%;
-  margin-bottom: 28px;
-}
-
-.time-sales-label {
-  font-weight: bold;
-  font-size: 16px;
-  margin-bottom: 10px;
-}
-
-.time-sales-graph-row {
-  width: 100%;
-  display: grid;
-  grid-template-columns: 1fr 90px;
-  gap: 12px;
-  align-items: center;
-}
-
-.time-sales-bar {
-  width: 100%;
-  height: 42px;
-  min-height: 42px;
-  display: flex;
-  overflow: hidden;
-  border-radius: 999px;
-  background-color: #eef1f4;
-  border: 1px solid #d8dee4;
-}
-
-.time-sales-segment {
-  height: 42px;
-  min-height: 42px;
-  display: block;
-  flex-shrink: 0;
-}
-
-.time-sales-total {
-  text-align: right;
-  font-weight: bold;
-  font-size: 14px;
-  white-space: nowrap;
-}
-
-@media (max-width: 800px) {
-  .time-sales-graph-row {
-    grid-template-columns: 1fr;
-  }
-
-  .time-sales-total {
-    text-align: left;
   }
 }
