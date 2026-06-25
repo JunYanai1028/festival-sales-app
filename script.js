@@ -112,106 +112,159 @@ document.addEventListener("DOMContentLoaded", () => {
     renderHourlySalesChart();
   }
 
-  function renderProducts() {
-    productList.innerHTML = "";
+ function renderProducts() {
+  productList.innerHTML = "";
 
-    if (products.length === 0) {
-      productList.innerHTML = '<p class="empty-message">まだ商品が登録されていません。</p>';
-      return;
+  if (products.length === 0) {
+    productList.innerHTML = '<p class="empty-message">まだ商品が登録されていません。</p>';
+    return;
+  }
+
+  products.forEach((product) => {
+    const remainingStock = product.stock - product.count;
+
+    let stockStatus = "";
+    let stockStatusClass = "";
+
+    if (remainingStock === 0) {
+      stockStatus = "完売";
+      stockStatusClass = "sold-out";
+    } else if (remainingStock <= 5) {
+      stockStatus = "残りわずか";
+      stockStatusClass = "low-stock";
+    } else {
+      stockStatus = "販売中";
+      stockStatusClass = "in-stock";
     }
 
-    products.forEach((product) => {
-      const remainingStock = product.stock - product.count;
+    const item = document.createElement("div");
+    item.className = "product-item";
 
-      let stockStatus = "";
-      let stockStatusClass = "";
-
-      if (remainingStock === 0) {
-        stockStatus = "完売";
-        stockStatusClass = "sold-out";
-      } else if (remainingStock <= 5) {
-        stockStatus = "残りわずか";
-        stockStatusClass = "low-stock";
-      } else {
-        stockStatus = "販売中";
-        stockStatusClass = "in-stock";
-      }
-
-      const item = document.createElement("div");
-      item.className = "product-item";
-
-      item.innerHTML = `
-        <div>
-          <div class="product-name">${product.name}</div>
-          <div class="product-price">${product.price.toLocaleString()}円</div>
-          <div class="product-stock">
-            在庫：${product.stock}個 ／ 残り：${remainingStock}個
-            <span class="${stockStatusClass}">${stockStatus}</span>
-          </div>
+    item.innerHTML = `
+      <div>
+        <div class="product-name">${product.name}</div>
+        <div class="product-price">${product.price.toLocaleString()}円</div>
+        <div class="product-stock">
+          在庫：${product.stock}個 ／ 残り：${remainingStock}個
+          <span class="${stockStatusClass}">${stockStatus}</span>
         </div>
+      </div>
 
-        <label>
-          販売数
+      <label class="input-group">
+        <span>販売数</span>
+        <div class="stepper">
+          <button
+            type="button"
+            class="step-button"
+            data-type="count"
+            data-action="decrease"
+            data-id="${product.id}"
+            ${product.count <= 0 ? "disabled" : ""}
+          >
+            −
+          </button>
+
           <input
             type="number"
             min="0"
             max="${product.stock}"
             value="${product.count}"
             data-id="${product.id}"
-            class="count-input"
+            class="count-input step-input"
           >
-        </label>
 
-        <div class="sale-area">
-          <label>
-            販売個数
+          <button
+            type="button"
+            class="step-button"
+            data-type="count"
+            data-action="increase"
+            data-id="${product.id}"
+            ${product.count >= product.stock ? "disabled" : ""}
+          >
+            ＋
+          </button>
+        </div>
+      </label>
+
+      <div class="sale-area">
+        <label class="input-group">
+          <span>販売個数</span>
+          <div class="stepper">
+            <button
+              type="button"
+              class="step-button"
+              data-type="sale"
+              data-action="decrease"
+              data-id="${product.id}"
+              ${remainingStock === 0 ? "disabled" : ""}
+            >
+              −
+            </button>
+
             <input
               type="number"
               min="1"
               max="${remainingStock}"
               value="1"
               data-id="${product.id}"
-              class="sale-quantity-input"
+              class="sale-quantity-input step-input"
               ${remainingStock === 0 ? "disabled" : ""}
             >
-          </label>
 
-          <button
-            class="sale-button"
-            data-id="${product.id}"
-            ${remainingStock === 0 ? "disabled" : ""}
-          >
-            販売登録
-          </button>
-        </div>
+            <button
+              type="button"
+              class="step-button"
+              data-type="sale"
+              data-action="increase"
+              data-id="${product.id}"
+              ${remainingStock <= 1 ? "disabled" : ""}
+            >
+              ＋
+            </button>
+          </div>
+        </label>
 
-        <div class="subtotal">
-          小計：${(product.price * product.count).toLocaleString()}円
-        </div>
-
-        <button class="delete-button" data-id="${product.id}">
-          削除
+        <button
+          class="sale-button"
+          data-id="${product.id}"
+          ${remainingStock === 0 ? "disabled" : ""}
+        >
+          販売登録
         </button>
-      `;
+      </div>
 
-      productList.appendChild(item);
-    });
+      <div class="subtotal">
+        小計：${(product.price * product.count).toLocaleString()}円
+      </div>
 
-    const countInputs = document.querySelectorAll(".count-input");
-    countInputs.forEach((input) => {
-      input.addEventListener("input", updateProductCount);
-    });
+      <button class="delete-button" data-id="${product.id}">
+        削除
+      </button>
+    `;
 
-    const saleButtons = document.querySelectorAll(".sale-button");
-    saleButtons.forEach((button) => {
-      button.addEventListener("click", registerSale);
-    });
+    productList.appendChild(item);
+  });
 
-    const deleteButtons = document.querySelectorAll(".delete-button");
-    deleteButtons.forEach((button) => {
-      button.addEventListener("click", deleteProduct);
-    });
-  }
+  const countInputs = document.querySelectorAll(".count-input");
+  countInputs.forEach((input) => {
+    input.addEventListener("input", updateProductCount);
+  });
+
+  const stepButtons = document.querySelectorAll(".step-button");
+  stepButtons.forEach((button) => {
+    button.addEventListener("click", handleStepButtonClick);
+  });
+
+  const saleButtons = document.querySelectorAll(".sale-button");
+  saleButtons.forEach((button) => {
+    button.addEventListener("click", registerSale);
+  });
+
+  const deleteButtons = document.querySelectorAll(".delete-button");
+  deleteButtons.forEach((button) => {
+    button.addEventListener("click", deleteProduct);
+  });
+}
 
   function updateProductCount(event) {
     const productId = Number(event.target.dataset.id);
@@ -242,7 +295,50 @@ document.addEventListener("DOMContentLoaded", () => {
     updateResults();
     renderHourlySalesChart();
   }
+function handleStepButtonClick(event) {
+  const productId = Number(event.target.dataset.id);
+  const type = event.target.dataset.type;
+  const action = event.target.dataset.action;
 
+  if (type === "count") {
+    const input = document.querySelector(`.count-input[data-id="${productId}"]`);
+    if (!input) return;
+
+    let value = Number(input.value);
+    const min = Number(input.min);
+    const max = Number(input.max);
+
+    if (action === "increase" && value < max) {
+      value += 1;
+    }
+
+    if (action === "decrease" && value > min) {
+      value -= 1;
+    }
+
+    input.value = value;
+    updateProductCount({ target: input });
+  }
+
+  if (type === "sale") {
+    const input = document.querySelector(`.sale-quantity-input[data-id="${productId}"]`);
+    if (!input) return;
+
+    let value = Number(input.value);
+    const min = Number(input.min);
+    const max = Number(input.max);
+
+    if (action === "increase" && value < max) {
+      value += 1;
+    }
+
+    if (action === "decrease" && value > min) {
+      value -= 1;
+    }
+
+    input.value = value;
+  }
+}
   function registerSale(event) {
     const productId = Number(event.target.dataset.id);
     const product = products.find((item) => item.id === productId);
